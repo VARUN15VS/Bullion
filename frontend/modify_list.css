@@ -1,0 +1,122 @@
+body, html {
+    height: 100%;
+    background-color: black;
+    color: #ffffff;
+    font-family: Consolas, "Lucida Console", monospace;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.header {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    background-color: black;
+    color: white;
+    margin-top: 0px;
+    border-bottom: white 2px dashed;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: white;
+}
+
+button {
+    background-color: black;
+    color: white;
+    min-width: 100px;
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: white 2px dashed;
+    margin-left: 10px;
+}
+
+#stocksdisplay {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: flex-start;
+}
+
+/* Stock card */
+.stock-card {
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 16px;
+    width: 260px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease;
+}
+.stock-card:hover {
+    transform: translateY(-4px);
+}
+
+.stock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.stock-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #00d1ff;
+}
+.stock-header span {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.stock-token {
+    margin: 6px 0;
+    font-size: 12px;
+    color: #888;
+}
+
+.stock-symbol {
+    margin: 6px 0;
+    font-size: 14px;
+    color: #ddd;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+.btn-view {
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: white;
+    cursor: pointer;
+}
+.btn-view:hover {
+    background: #0056b3;
+}
+
+.btn-delete {
+    background: #dc3545;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: white;
+    cursor: pointer;
+}
+.btn-delete:hover {
+    background: #a71d2a;
+}

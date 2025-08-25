@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="createlist.css">
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>BULLION</h1>
+        </div>
+        <div>
+            <a href="home.html"><button class="home">Home</button></a>
+            <button class="lists">Lists</button>
+        </div>
+    </div>
+    <div class="main">
+        <div class="listinfo"></div>
+        <div class="search-container">
+            <input type="text" id="search" class="search" placeholder="Search for Stock">
+            <button id="searchButton" class="searchButton">Search</button>
+        </div>
+        <div class="result"></div>
+    </div>
+    <div class="table" id="table">Loading Stocks...</div>
+    <script>
+         document.getElementById("searchBtn").addEventListener("click", async function () {
+      const query = document.getElementById("searchInput").value.trim();
+      const resultsDiv = document.getElementById("results");
+
+      if (!query) {
+        resultsDiv.innerHTML = "<p>Please enter a stock name.</p>";
+        return;
+      }
+
+      resultsDiv.innerHTML = "<p>Searching...</p>";
+
+      try {
+        const res = await fetch("http://127.0.0.1:5000/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: query })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          resultsDiv.innerHTML = `<p>${data.error || "Something went wrong."}</p>`;
+          return;
+        }
+
+        // Show results
+        if (data.results && data.results.length > 0) {
+          resultsDiv.innerHTML = "";
+          data.results.forEach(stock => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <strong>${stock.name}</strong> (${stock.tradingsymbol})
+              <button onclick="alert('Added ${stock.tradingsymbol}')">Add</button>
+            `;
+            resultsDiv.appendChild(card);
+          });
+        } else {
+          resultsDiv.innerHTML = "<p>No results found.</p>";
+        }
+
+      } catch (err) {
+        console.error(err);
+        resultsDiv.innerHTML = "<p>Error connecting to server.</p>";
+      }
+    });
+    </script>
+</body>
+
+</html>

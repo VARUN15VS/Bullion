@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Chart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #header {
+            margin: 20px;
+            text-align: center;
+        }
+        #chart {
+            width: 90%;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h2 id="stockName">Stock Name</h2>
+        <p id="exchange"></p>
+    </div>
+    <div id="chart"></div>
+
+    <!-- Correct Lightweight Charts standalone script -->
+    <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
+
+    <script>
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const trading_symbol = params.get("trading_symbol");
+            const exchange = params.get("exchange");
+            const stock_name = params.get("stock_name");
+
+            document.getElementById("stockName").textContent = stock_name || "Unknown Stock";
+            document.getElementById("exchange").textContent = exchange || "";
+
+            // Create chart
+            const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                width: document.getElementById('chart').clientWidth,
+                height: 600,
+                layout: { backgroundColor: '#ffffff', textColor: '#000' },
+                grid: { vertLines: { color: '#eee' }, horzLines: { color: '#eee' } },
+                crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+                rightPriceScale: { borderColor: '#ccc' },
+                timeScale: { borderColor: '#ccc' },
+            });
+
+            // Add candlestick series
+            const candleSeries = chart.addCandlestickSeries();
+
+            // Fetch data from backend
+            fetch(`http://127.0.0.1:5000/api/candles/${exchange}/${trading_symbol}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        alert("No candle data available for this stock");
+                        return;
+                    }
+                    candleSeries.setData(data);
+                })
+                .catch(err => {
+                    console.error("Error fetching candle data:", err);
+                    alert("Error fetching candle data. See console.");
+                });
+
+            // Make chart responsive
+            window.addEventListener('resize', () => {
+                chart.applyOptions({ width: document.getElementById('chart').clientWidth });
+            });
+        };
+    </script>
+</body>
+</html>

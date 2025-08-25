@@ -1,0 +1,64 @@
+body {
+    background-color: black;
+    color: #ffffff;
+    font-family: Consolas, "Lucida Console", monospace;
+}
+.header {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    background-color: black;
+    color: white;
+    margin-top: 0px;
+    border-bottom: white 2px dashed;
+}
+button {
+    background-color: black;
+    color: white;
+    min-width: 100px;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: white 2px dashed;
+    gap: 10px;
+    margin-left: 10px;
+}
+.lists {
+    background-color: black;
+    color: cyan;
+    border: cyan 2px dashed;
+}
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+.main {
+    padding: 10px;
+}
+.search {
+    background-color: black;
+    color: white;
+    font-family: Consolas, "Lucida Console", monospace;
+    border: 2px dashed white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+.searchButton {
+    height: 20px;
+    transition: background-color 0.3s ease;
+}
+.searchButton:hover {
+    background-color: #333;
+    border: cyan 2px dashed;
+}

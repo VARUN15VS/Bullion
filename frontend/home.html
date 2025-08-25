@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>BULLION</h1>
+        </div>
+        <div>
+            <button class="home">Home</button>
+            <a href="list.html"><button class="lists">Lists</button></a>
+        </div>
+    </div>
+    <div class="main">
+        <div class="selection">
+            <p>Please select the trend, algorithm and list: </p>
+            <p>
+                Select the trend: 
+                <select name="trend" id="trend">
+                    <option value="selector">Select</option>
+                    <option value="Bullish">Bullish</option>
+                    <option value="Bearish">Bearish</option>
+                </select>
+            </p>
+            <p>
+                Select the algorithm: 
+                <select name="algorithm" id="algorithm">
+                    <option value="selector">Select</option>
+                </select>
+            </p>
+            <p>
+                Select the list: 
+                <select name="list" id="list">
+                    <option value="selector">Select</option>
+                </select>
+            </p>
+        </div>
+        <div>
+            <button id="startBtn" onclick="">START</button>
+        </div>
+    </div>
+    <div class="result"></div>
+    <script src="script.js"></script>
+</body>
+</html>

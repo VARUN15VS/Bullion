@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BULLION</title>
+    <link rel="stylesheet" href="modify_list.css">
+</head>
+<body>
+    <div class="header">
+            <div>
+                <h1>BULLION</h1>
+            </div>
+            <div>
+                <a href="home.html"><button class="home">Home</button></a>
+                <button class="lists">Lists</button>
+            </div>
+    </div>
+    <div class="list_name" id="list_name" style="margin-left: 50px;"></div>
+    <div id="stocksdisplay" style="display: flex; flex-wrap: wrap; gap: 16px;"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const listName = params.get("list");
+            if (!listName) {
+                document.getElementById("stocksdisplay").innerHTML = "<p>No list selected</p>";
+                return;
+            }
+
+            const listNameDiv = document.getElementById("list_name");
+            listNameDiv.innerHTML = `<h2>List Name: ${listName}</h2>`;
+
+            fetch(`http://127.0.0.1:5000/api/list/${encodeURIComponent(listName)}/stocks`)
+                .then(response => response.json())
+                .then(data => displayStocks(data))
+                .catch(err => {
+                    console.error("Error fetching stocks:", err);
+                    document.getElementById("stocksdisplay").innerHTML = "<p>Error loading stocks</p>";
+                });
+        });
+
+        function displayStocks(data) {
+            const container = document.getElementById("stocksdisplay");
+            container.innerHTML = "";
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = "<p>No stocks found in this list</p>";
+                return;
+            }
+
+            data.forEach(stock => {
+                const card = document.createElement("div");
+                card.className = "stock-card";
+
+                // Heading with stock name + exchange
+                const header = document.createElement("div");
+                header.className = "stock-header";
+                header.innerHTML = `<h3>${stock.stock_name}</h3>
+                                    <span>${stock.exchange}</span>`;
+
+                // Token
+                const token = document.createElement("p");
+                token.className = "stock-token";
+                token.textContent = `Token: ${stock.symbol_token}`;
+
+                // Trading symbol
+                const trading = document.createElement("p");
+                trading.className = "stock-symbol";
+                trading.innerHTML = `<strong>Symbol:</strong> ${stock.trading_symbol}`;
+
+                // Buttons
+                const btnContainer = document.createElement("div");
+                btnContainer.className = "btn-container";
+
+                const viewBtn = document.createElement("button");
+                viewBtn.className = "btn-view";
+                viewBtn.textContent = "View Chart";
+                viewBtn.onclick = () => viewChart(stock);
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "btn-delete";
+                deleteBtn.textContent = "Delete";
+                deleteBtn.onclick = () => deleteStock(stock);
+
+                btnContainer.appendChild(viewBtn);
+                btnContainer.appendChild(deleteBtn);
+
+                card.appendChild(header);
+                card.appendChild(token);
+                card.appendChild(trading);
+                card.appendChild(btnContainer);
+
+                container.appendChild(card);
+            });
+        }
+
+        function viewChart(stock) {
+            const params = new URLSearchParams({
+                trading_symbol: stock.trading_symbol,
+                exchange: stock.exchange,
+                stock_name: stock.stock_name
+            });
+            window.location.href = `chart.html?${params.toString()}`;
+        }
+
+        function deleteStock(stock) {
+            if (confirm(`Are you sure you want to delete ${stock.trading_symbol}?`)) {
+                alert(`${stock.trading_symbol} deleted`);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="list.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>BULLION</h1>
+            </div>
+            <div>
+                <a href="home.html"><button class="home">Home</button></a>
+                <button class="lists">Lists</button>
+            </div>
+        </div>
+        <main class="main">
+            <div class="listsdisplay" id="listsdisplay">
+                <!-- Lists will be populated here -->
+            </div>
+        </main>
+        <footer>
+            <div class="footerbuttons">
+                <button class="create" onclick="askName()">Create List</button>
+                <a href="#"><button class="deleteall">Delete All Lists</button></a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchLists();
+        });
+
+        function fetchLists() {
+            fetch("http://127.0.0.1:5000/api/lists")
+                .then(response => response.json())
+                .then(data => displayLists(data))
+                .catch(err => {
+                    console.error("Error fetching lists:", err);
+                    document.getElementById("listsdisplay").innerHTML = "<p>Error loading lists</p>";
+                });
+        }
+
+        function displayLists(data) {
+            const container = document.getElementById("listsdisplay");
+            container.innerHTML = ""; // clear previous content
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = "<p>No lists found</p>";
+                return;
+            }
+
+            let table = "<table border='1' cellpadding='8' cellspacing='0'>";
+            table += "<tr><th>List Name</th><th>No. of Stocks</th><th>Modify</th></tr>";
+
+            data.forEach(item => {
+                table += `<tr>
+                <td>${item.list_name}</td>
+                <td>${item.stocks}</td>
+                <td><button onclick="modifyList('${item.list_name}')">Modify</button></td>
+            </tr>`;
+            });
+
+            table += "</table>";
+            container.innerHTML = table;
+        }
+
+        function modifyList(listName) {
+            window.location.href = `modify_list.html?list=${encodeURIComponent(listName)}`;
+        }
+
+
+        function askName() {
+            const name = prompt("Please enter the list name:");
+            if (name) {
+                console.log("Sending name:", name);
+
+                fetch('http://127.0.0.1:5000/check_name', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: name })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Received response:", data);  // 🪵 Debug log
+
+                        if (data.status === 'exists') {
+                            alert("List name already exists!");
+                        } else if (data.status === 'not_found') {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            alert("An error occurred.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        alert("Server error.");
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

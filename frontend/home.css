@@ -1,0 +1,61 @@
+body {
+    background-color: black;
+    color: #ffffff;
+    font-family: Consolas, "Lucida Console", monospace;
+}
+.header {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    background-color: black;
+    color: white;
+    margin-top: 0px;
+    border-bottom: white 2px dashed;
+}
+button {
+    background-color: black;
+    color: white;
+    min-width: 100px;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: white 2px dashed;
+    gap: 10px;
+}
+.home {
+    background-color: black;
+    color: cyan;
+    border: cyan 2px dashed;
+}
+.main {
+    padding: 10px;
+}
+select {
+    background-color: black;
+    color: white;
+    font-family: Consolas, "Lucida Console", monospace;
+    border: 2px dashed white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none; 
+}
+.selection p {
+    margin: 10px 0;
+}
+select:hover {
+    border-color: #ccc;
+}
+select:focus {
+    outline: none;
+    border-color: yellow;
+}
