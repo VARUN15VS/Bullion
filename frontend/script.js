@@ -24,15 +24,13 @@ document.getElementById("startBtn").addEventListener("click", () => {
 
 function displayResults(data) {
     const resultDiv = document.querySelector(".result");
-    resultDiv.innerHTML = ""; // clear old results
+    resultDiv.innerHTML = ""; 
 
-    // Display counts
     resultDiv.innerHTML += `
         <p>Total Stocks: ${data.count.total}</p>
         <p>Eligible: ${data.count.eligible} | Rejected: ${data.count.rejected}</p>
     `;
 
-    // Display Eligible Table
     if (data.eligible.length > 0) {
         resultDiv.innerHTML += "<h3>Eligible Stocks</h3>";
         resultDiv.innerHTML += createTable(data.eligible);
@@ -40,7 +38,6 @@ function displayResults(data) {
         resultDiv.innerHTML += "<h3>Eligible Stocks</h3><p>None</p>";
     }
 
-    // Display Rejected Table
     if (data.rejected.length > 0) {
         resultDiv.innerHTML += "<h3>Rejected Stocks</h3>";
         resultDiv.innerHTML += createTable(data.rejected);
@@ -85,8 +82,8 @@ window.onload = function() {
             } else {
                 data.forEach(item => {
                     const option = document.createElement('option');
-                    option.value = item.list_name;        // value for form/backend
-                    option.textContent = item.list_name;  // what user sees
+                    option.value = item.list_name;
+                    option.textContent = item.list_name;
                     dropdown.appendChild(option);
                 });
             }
@@ -102,26 +99,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const trendSelect = document.getElementById("trend");
     const algoSelect = document.getElementById("algorithm");
 
-    // Keep keys same as your HTML option values (case sensitive)
     const algorithms = {
-        Bullish: ["Shooting Star"],
-        Bearish: ["Algorithm X", "Algorithm Y"],
+        Bullish: ["Algorithm X", "Algorithm Y"],
+        Bearish: ["Shooting Star"],
     };
 
     function updateAlgorithms() {
-        // Clear old options
         algoSelect.innerHTML = "";
 
-        // Always add default "Select"
         const defaultOption = document.createElement("option");
         defaultOption.text = "Select";
         defaultOption.value = "selector";
         algoSelect.add(defaultOption);
 
-        // Get selected trend
         const selectedTrend = trendSelect.value;
 
-        // If trend exists in our object, add its algorithms
         if (algorithms[selectedTrend]) {
             algorithms[selectedTrend].forEach(algo => {
                 const option = document.createElement("option");
@@ -132,37 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Run once on load so dropdown is initialized
     updateAlgorithms();
 
-    // Run again whenever trend changes
     trendSelect.addEventListener("change", updateAlgorithms);
 });
-
-
-
-
-        // function loadStocks() {
-        //     fetch(`http://127.0.0.1:5000/api/stocks`)
-        //         .then(response => response.json())
-        //         .then(stocks => {
-        //             const container = document.getElementById('table');
-        //             if (stocks.length === 0) {
-        //                 container.innerHTML = '<p>No stock is found</p>';
-        //                 return;
-        //             }
-        //             let html = '<table border="1" cellpadding="8" cellspacing="0">';
-        //             html += '<thead><tr><th>Stock Name</th><th>Trading Symbol</th></tr></thead><tbody>';
-        //             stocks.forEach(stock => {
-        //                 html += `<tr><td>${stock.stock_name}</td><td>${stock.tradingsymbol}</td></tr>`;
-        //             });
-        //             html += '</tbody></table>';
-        //             container.innerHTML = html;
-        //         })
-        //         .catch(err => {
-        //             document.getElementById('table').innerHTML = 'Error loading stocks';
-        //             console.error(err);
-        //         });
-        // }
-
-        // window.onload = loadStocks;

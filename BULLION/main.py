@@ -88,8 +88,6 @@ def get_ltp():
             return jsonify({"error": "Symbol not found"}), 404
 
         symboltoken = picked.get("symboltoken")
-
-        # Fetch LTP data
         ltp_resp = smartApi.ltpData(exchange=exchange, tradingsymbol=tradingsymbol, symboltoken=symboltoken)
         ltp_data = ltp_resp.get("data")
 
@@ -112,6 +110,117 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+@app.route('/add_stock', methods=['POST'])
+def add_stock():
+    try:
+        data = request.get_json(force=True)
+        list_name = data.get('list_name')
+        stock_name = data.get('stock_name')
+        exchange = data.get('exchange')
+        trading_symbol = data.get('trading_symbol')
+        symbol_token = data.get('symbol_token')
+        instrument_type = 'EQ'
+
+        if not all([list_name, stock_name, exchange, trading_symbol, symbol_token]):
+            return jsonify({'status': 'error', 'message': 'All fields are required'}), 400
+
+        insert_sql = text("""
+            INSERT INTO stocks (list_name, stock_name, exchange, trading_symbol, symbol_token, instrument_type)
+            VALUES (:list_name, :stock_name, :exchange, :trading_symbol, :symbol_token, :instrument_type)
+        """)
+        db.session.execute(insert_sql, {
+            'list_name': list_name,
+            'stock_name': stock_name,
+            'exchange': exchange,
+            'trading_symbol': trading_symbol,
+            'symbol_token': symbol_token,
+            'instrument_type': instrument_type
+        })
+
+        update_sql = text("""
+            UPDATE lists
+            SET stocks = stocks + 1
+            WHERE list_name = :list_name
+        """)
+        db.session.execute(update_sql, {'list_name': list_name})
+
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Stock added successfully'})
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error:", str(e))
+        return jsonify({'status': 'error', 'message': 'Server error'}), 500
+    
+@app.route('/delete_stock', methods=['POST'])
+def delete_stock():
+    try:
+        data = request.get_json(force=True)
+        list_name = data.get('list_name')
+        trading_symbol = data.get('trading_symbol')
+
+        if not all([list_name, trading_symbol]):
+            return jsonify({'status': 'error', 'message': 'List name and trading symbol are required'}), 400
+
+        delete_sql = text("""
+            DELETE FROM stocks
+            WHERE list_name = :list_name AND trading_symbol = :trading_symbol
+        """)
+        result = db.session.execute(delete_sql, {
+            'list_name': list_name,
+            'trading_symbol': trading_symbol
+        })
+
+        if result.rowcount == 0:
+            return jsonify({'status': 'error', 'message': 'Stock not found in the specified list'}), 404
+
+        update_sql = text("""
+            UPDATE lists
+            SET stocks = GREATEST(stocks - 1, 0)
+            WHERE list_name = :list_name
+        """)
+        db.session.execute(update_sql, {'list_name': list_name})
+
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Stock deleted successfully'})
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error:", str(e))
+        return jsonify({'status': 'error', 'message': 'Server error'}), 500
+    
+@app.route('/delete_list', methods=['POST'])
+def delete_list():
+    try:
+        data = request.get_json(force=True)
+        list_name = data.get('list_name')
+
+        if not list_name:
+            return jsonify({'status': 'error', 'message': 'List name is required'}), 400
+
+        delete_sql = text("""
+            DELETE FROM lists
+            WHERE list_name = :list_name
+        """)
+        result = db.session.execute(delete_sql, {'list_name': list_name})
+
+        if result.rowcount == 0:
+            return jsonify({'status': 'error', 'message': 'List not found'}), 404
+
+        delete_stocks_sql = text("""
+            DELETE FROM stocks
+            WHERE list_name = :list_name
+        """)
+        db.session.execute(delete_stocks_sql, {'list_name': list_name})
+
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'List and associated stocks deleted successfully'})
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error:", str(e))
+        return jsonify({'status': 'error', 'message': 'Server error'}), 500
+
 @app.route('/check_name', methods=['POST'])
 def check_name():
     try:
@@ -127,31 +236,18 @@ def check_name():
         if result:
             return jsonify({'status': 'exists'})
         else:
-            stock = 0
             insert_sql = text("INSERT INTO lists (list_name, stocks) VALUES (:name, :stock)")
-            db.session.execute(insert_sql, {'name': name, 'stock': stock})
+            db.session.execute(insert_sql, {'name': name, 'stock': 0})
             db.session.commit()
-            db.session.execute(text("TRUNCATE TABLE curr_list"))
-            db.session.commit()
-            insert_sql = text("INSERT INTO curr_list (list_name) VALUES (:name)")
-            db.session.execute(insert_sql, {'name': name})
-            db.session.commit() 
-            return jsonify({'status': 'not_found', 'redirect_url': 'http://127.0.0.1:3000/frontend/createlist.html'})
+            return jsonify({
+                'status': 'not_found',
+                'redirect_url': f"/modify_list.html?list={name}"
+            })
 
     except Exception as e:
         print("Error:", str(e))
         return jsonify({'status': 'error', 'message': 'Server error'}), 500
-
-
-# @app.route('/api/stocks')
-# def api_stocks(list_name):  # Problem: Flask won't pass list_name automatically here!
-#     sql = text("SELECT list_name FROM curr_list LIMIT 1")
-#     list_name = db.session.execute(sql).fetchone()  # This returns a Row, not a string!
-
-#     sql = text("SELECT stock_name, tradingsymbol FROM stocks WHERE list_name = :list_name")
-#     result = db.session.execute(sql, {'list_name': list_name}).fetchall()  # Problem: list_name is a Row object
-#     stocks = [{'stock_name': r.stock_name, 'tradingsymbol': r.tradingsymbol} for r in result]
-#     return jsonify(stocks)
+    
 
 @app.route("/api/lists", methods=["GET"])
 def get_lists():
@@ -159,7 +255,7 @@ def get_lists():
         sql = text("SELECT list_name, stocks FROM lists")
         result = db.session.execute(sql).fetchall()
         if not result:
-            return jsonify([])  # No lists found
+            return jsonify([])
         lists = [{"list_name": r.list_name, "stocks": r.stocks} for r in result]
         return jsonify(lists)
     except Exception as e:
@@ -180,7 +276,6 @@ def get_list_stocks(list_name):
 @app.route("/api/candles/<exchange>/<trading_symbol>", methods=["GET"])
 def get_candles(exchange, trading_symbol):
     try:
-        # --- Step 1: Check cached candles in DB (last 30 days) ---
         from_ts = int((datetime.datetime.now() - datetime.timedelta(days=30)).timestamp() * 1000)
         cached_sql = text("""
             SELECT candle_time, open_price, high_price, low_price, close_price
@@ -191,7 +286,6 @@ def get_candles(exchange, trading_symbol):
         cached_data = db.session.execute(cached_sql, {"ts": trading_symbol, "ex": exchange, "from_ts": from_ts}).fetchall()
 
         if cached_data:
-            # Return cached data immediately
             candles = [
                 {"time": r.candle_time, "open": float(r.open_price), "high": float(r.high_price),
                  "low": float(r.low_price), "close": float(r.close_price)} 
@@ -199,7 +293,6 @@ def get_candles(exchange, trading_symbol):
             ]
             return jsonify(candles)
 
-        # --- Step 2: Fetch symbol_token from MySQL ---
         sql = text("""
             SELECT symbol_token 
             FROM stocks 
@@ -211,22 +304,17 @@ def get_candles(exchange, trading_symbol):
             return jsonify({"error": "Symbol not found in database"}), 404
 
         symbol_token = result.symbol_token
-
-        # --- Step 3: Authenticate SmartAPI session ---
         totp = pyotp.TOTP(TOTP_SECRET).now()
         session_data = smartApi.generateSession(CLIENT_ID, PIN, totp)
         if not session_data or not session_data.get("data") or not session_data["data"].get("jwtToken"):
             return jsonify({"error": "Failed to authenticate Smart API session"}), 401
 
-        # --- Step 4: Fetch historical candles from SmartAPI ---
         candle_response = smartApi.getCandleData(symbol_token, "1day")
         candles_raw = candle_response.get("data", {}).get("candle", [])
         if not candles_raw:
             return jsonify({"error": "No candle data found"}), 404
 
-        # --- Step 5: Insert fetched candles into MySQL ---
         for candle in candles_raw:
-            # Convert date string to timestamp in ms
             timestamp = int(datetime.datetime.strptime(candle[0], "%Y-%m-%d").timestamp()) * 1000
             db.session.execute(text("""
                 INSERT IGNORE INTO candles (trading_symbol, exchange, symbol_token, candle_time, open_price, high_price, low_price, close_price)
@@ -243,7 +331,6 @@ def get_candles(exchange, trading_symbol):
             })
         db.session.commit()
 
-        # --- Step 6: Return fetched candles ---
         candles = [
             {"time": int(datetime.datetime.strptime(c[0], "%Y-%m-%d").timestamp())*1000,
              "open": float(c[1]), "high": float(c[2]), "low": float(c[3]), "close": float(c[4])}
@@ -254,131 +341,6 @@ def get_candles(exchange, trading_symbol):
     except Exception as e:
         print("Error in /api/candles:", str(e))
         return jsonify({"error": str(e)}), 500
-
-
-    
-# @app.route("/api/candles/<exchange>/<trading_symbol>", methods=["GET"])
-# def get_candles(exchange, trading_symbol):
-#     try:
-#         # --- Fetch symbol_token from MySQL ---
-#         sql = text("""
-#             SELECT symbol_token 
-#             FROM stocks 
-#             WHERE trading_symbol = :ts AND exchange = :ex
-#             LIMIT 1
-#         """)
-#         result = db.session.execute(sql, {"ts": trading_symbol, "ex": exchange}).fetchone()
-#         if not result:
-#             return jsonify({"error": "Symbol not found in database"}), 404
-
-#         symbol_token = result.symbol_token
-
-#         # --- Authenticate SmartAPI session ---
-#         totp = pyotp.TOTP(TOTP_SECRET).now()
-#         session_data = smartApi.generateSession(CLIENT_ID, PIN, totp)
-#         if not session_data or not session_data.get("data") or not session_data["data"].get("jwtToken"):
-#             return jsonify({"error": "Failed to authenticate Smart API session"}), 401
-
-#         # --- Fetch candle data ---
-#         from_date = (datetime.datetime.now() - datetime.timedelta(days=30)).strftime("%Y-%m-%d %H:%M")
-#         to_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-
-#         candle_response = smartApi.getCandleData({
-#             "exchange": exchange,
-#             "symboltoken": symbol_token,
-#             "interval": "ONE_DAY",
-#             "fromdate": from_date,
-#             "todate": to_date
-#         })
-
-#         if isinstance(candle_response, dict):
-#             candles_raw = candle_response.get("data", {}).get("candle", [])
-#         elif isinstance(candle_response, list):
-#             candles_raw = candle_response
-#         else:
-#             return jsonify({"error": "Unexpected candle data format"}), 502
-
-#         if not candles_raw:
-#             return jsonify({"error": "No candle data found"}), 404
-
-#         # --- Transform candles for frontend ---
-#         candles = []
-#         for candle in candles_raw:
-#             try:
-#                 timestamp = int(datetime.datetime.strptime(candle[0], "%Y-%m-%dT%H:%M:%S+05:30").timestamp()) * 1000
-#             except Exception:
-#                 timestamp = int(datetime.datetime.strptime(candle[0], "%Y-%m-%d").timestamp()) * 1000
-#             candles.append({
-#                 "time": timestamp,
-#                 "open": float(candle[1]),
-#                 "high": float(candle[2]),
-#                 "low": float(candle[3]),
-#                 "close": float(candle[4])
-#             })
-
-#         return jsonify(candles)
-
-#     except Exception as e:
-#         print("Error in /api/candles:", str(e))
-#         return jsonify({"error": str(e)}), 500
-
-
-
-    
-# @app.route("/chart", methods=["POST"])
-# def chart():
-#     stock_name = request.form.get("stock_name")
-#     trading_symbol = request.form.get("trading_symbol")
-#     exchange = request.form.get("exchange")
-#     symbol_token = request.form.get("symbol_token")
-
-#     if not trading_symbol or not exchange or not symbol_token:
-#         return "Stock info missing", 400
-
-#     try:
-#         from_date = (datetime.datetime.now() - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
-#         to_date = datetime.datetime.now().strftime("%Y-%m-%d")
-
-#         # Positional arguments
-#         historical_data = smartApi.getCandleData(
-#             exchange,
-#             symbol_token,
-#             "1day",
-#             from_date,
-#             to_date
-#         )
-
-#         chart_data = []
-#         for candle in historical_data['data']['candle']:
-#             timestamp = int(datetime.datetime.strptime(candle[0], "%Y-%m-%d").timestamp())
-#             open_, high, low, close = float(candle[1]), float(candle[2]), float(candle[3]), float(candle[4])
-#             chart_data.append({
-#                 "time": timestamp,
-#                 "open": open_,
-#                 "high": high,
-#                 "low": low,
-#                 "close": close
-#             })
-
-#         last_close = chart_data[-1]["close"] if chart_data else None
-#         ltp_data = smartApi.ltpData(exchange, trading_symbol)
-#         current_price = ltp_data.get(trading_symbol, {}).get("ltp", last_close)
-
-#         return render_template(
-#             "chart.html",
-#             stock_name=stock_name,
-#             trading_symbol=trading_symbol,
-#             exchange=exchange,
-#             symbol_token=symbol_token,
-#             chart_data=chart_data,
-#             last_close=last_close,
-#             current_price=current_price
-#         )
-
-#     except Exception as e:
-#         return f"Error fetching stock data: {str(e)}", 500
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)

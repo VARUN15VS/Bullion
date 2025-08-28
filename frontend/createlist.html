@@ -52,8 +52,6 @@
           resultsDiv.innerHTML = `<p>${data.error || "Something went wrong."}</p>`;
           return;
         }
-
-        // Show results
         if (data.results && data.results.length > 0) {
           resultsDiv.innerHTML = "";
           data.results.forEach(stock => {

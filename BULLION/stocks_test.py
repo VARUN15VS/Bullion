@@ -1,10 +1,7 @@
 from shooting_star import is_uptrend, is_shooting_star, compute_levels
 import datetime as dt
 
-# ---------------- Dummy candles ----------------
 def get_dummy_candles_for_stock(stock_symbol):
-    """Return dummy candles with clear patterns for testing."""
-
     # Uptrend + Shooting Star (eligible)
     if stock_symbol in ["ICICIBANK-EQ", "TCS-EQ"]:
         prev = [{"time": f"2025-08-1{i} 00:00", "open": 100+i, "high": 101+i, "low": 99+i, "close": 100+i, "volume": 1000+i} for i in range(6)]
@@ -23,7 +20,6 @@ def get_dummy_candles_for_stock(stock_symbol):
         last = {"time": "2025-08-17 00:00", "open": 95, "high": 96, "low": 94, "close": 95, "volume": 1200}
         return prev + [last]
 
-# ---------------- Test Function ----------------
 def test_shooting_star():
     with open("BULLION\dummy_stocks.txt") as f:
         stocks = [line.strip().split(",") for line in f.readlines()]

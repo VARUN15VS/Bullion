@@ -1,67 +1,106 @@
-body, html {
-    height: 100%;
-    background-color: black;
-    color: #ffffff;
-    font-family: Consolas, "Lucida Console", monospace;
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1f1f2e, #3a3a5c);
+    color: #f5f5f5;
 }
 
 .header {
-    height: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-top: 0px;
-    padding-bottom: 10px;
-    background-color: black;
-    color: white;
-    margin-top: 0px;
-    border-bottom: white 2px dashed;
+    padding: 15px 50px;
 }
 
 .header h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 2em;
+    letter-spacing: 2px;
+    color: #ffd700;
+}
+
+.header button {
+    margin-left: 10px;
+    padding: 8px 15px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.header button.home {
+    background-color: #4CAF50;
     color: white;
 }
 
-button {
-    background-color: black;
+.header button.lists {
+    background-color: #2196F3;
     color: white;
-    min-width: 100px;
-    min-height: 40px;
-    padding: 8px 14px;
-    font-size: 14px;
-    border-radius: 4px;
+}
+
+.header button:hover {
+    opacity: 0.8;
+}
+
+.list_name h2 {
+    margin: 20px 0;
+    color: #ffd700;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 10px;
+}
+
+.search {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: none;
+    width: 250px;
+}
+
+.searchButton {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
     cursor: pointer;
-    border: white 2px dashed;
-    margin-left: 10px;
+    transition: 0.3s;
+}
+
+.searchButton:hover {
+    opacity: 0.8;
+}
+
+.result {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 1em;
 }
 
 #stocksdisplay {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px;
-    justify-content: flex-start;
+    gap: 16px;
+    justify-content: center;
 }
 
-/* Stock card */
 .stock-card {
-    background: #1a1a1a;
-    border: 1px solid #444;
-    border-radius: 12px;
-    padding: 16px;
-    width: 260px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    transition: transform 0.2s ease;
+    background-color: rgba(50, 50, 80, 0.85);
+    padding: 15px;
+    border-radius: 10px;
+    width: 220px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
 }
+
 .stock-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-5px);
 }
 
 .stock-header {
@@ -69,54 +108,106 @@ button {
     justify-content: space-between;
     align-items: center;
 }
+
 .stock-header h3 {
     margin: 0;
-    font-size: 18px;
-    color: #00d1ff;
+    font-size: 1.1em;
+    color: #ffd700;
 }
+
 .stock-header span {
-    font-size: 14px;
-    color: #aaa;
+    font-size: 0.9em;
+    color: #a0a0a0;
 }
 
-.stock-token {
-    margin: 6px 0;
-    font-size: 12px;
-    color: #888;
-}
-
+.stock-token,
 .stock-symbol {
-    margin: 6px 0;
-    font-size: 14px;
-    color: #ddd;
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.btn-add,
+.btn-view,
+.btn-delete {
+    margin: 5px 0;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    transition: 0.3s;
+}
+
+.btn-add {
+    background-color: #2196F3;
+}
+
+.btn-view {
+    background-color: #4CAF50;
+}
+
+.btn-delete {
+    background-color: #f44336;
+}
+
+.btn-add:hover,
+.btn-view:hover,
+.btn-delete:hover {
+    opacity: 0.8;
 }
 
 .btn-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 12px;
 }
 
-.btn-view {
-    background: #007bff;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    color: white;
-    cursor: pointer;
-}
-.btn-view:hover {
-    background: #0056b3;
+@media (max-width: 700px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .search-container {
+        flex-direction: column;
+    }
+
+    .stock-card {
+        width: 100%;
+    }
 }
 
-.btn-delete {
-    background: #dc3545;
+.result {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center;
+    margin: 20px auto;
+    padding: 10px 20px;
+    min-height: 40px;
+    width: 90%;
+    text-align: center;
+    font-size: 1em;
+    color: #ffd700;
+    background-color: rgba(50, 50, 80, 0.6);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.result p {
+    margin: 5px 0;
+}
+.deletelist {
+    text-align: center;
+    margin: 20px 0;
+}
+.deletelist button {
+    padding: 10px 20px;
+    font-size: 1em;
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 5px;
+    background-color: #f44336;
     color: white;
     cursor: pointer;
-}
-.btn-delete:hover {
-    background: #a71d2a;
+    transition: 0.3s;
 }

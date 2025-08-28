@@ -6,21 +6,56 @@
     <title>Stock Chart</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #header {
-            margin: 20px;
-            text-align: center;
-        }
-        #chart {
-            width: 90%;
-            height: 600px;
-        }
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #1f1f2e, #3a3a5c);
+    color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#header {
+    margin: 20px;
+    text-align: center;
+}
+
+#header h2 {
+    margin: 0;
+    font-size: 2em;
+    color: #ffd700;
+}
+
+#header p {
+    margin: 5px 0 0 0;
+    font-size: 1.2em;
+    color: #ccc;
+}
+
+#chart {
+    width: 90%;
+    max-width: 1200px;
+    height: 600px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    margin-bottom: 40px;
+}
+
+@media (max-width: 800px) {
+    #chart {
+        width: 95%;
+        height: 400px;
+    }
+    #header h2 {
+        font-size: 1.5em;
+    }
+    #header p {
+        font-size: 1em;
+    }
+}
     </style>
 </head>
 <body>
@@ -29,8 +64,6 @@
         <p id="exchange"></p>
     </div>
     <div id="chart"></div>
-
-    <!-- Correct Lightweight Charts standalone script -->
     <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
 
     <script>
@@ -43,7 +76,6 @@
             document.getElementById("stockName").textContent = stock_name || "Unknown Stock";
             document.getElementById("exchange").textContent = exchange || "";
 
-            // Create chart
             const chart = LightweightCharts.createChart(document.getElementById('chart'), {
                 width: document.getElementById('chart').clientWidth,
                 height: 600,
@@ -53,11 +85,8 @@
                 rightPriceScale: { borderColor: '#ccc' },
                 timeScale: { borderColor: '#ccc' },
             });
-
-            // Add candlestick series
             const candleSeries = chart.addCandlestickSeries();
 
-            // Fetch data from backend
             fetch(`http://127.0.0.1:5000/api/candles/${exchange}/${trading_symbol}`)
                 .then(res => res.json())
                 .then(data => {
@@ -71,8 +100,6 @@
                     console.error("Error fetching candle data:", err);
                     alert("Error fetching candle data. See console.");
                 });
-
-            // Make chart responsive
             window.addEventListener('resize', () => {
                 chart.applyOptions({ width: document.getElementById('chart').clientWidth });
             });

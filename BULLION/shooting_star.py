@@ -15,23 +15,21 @@ ENTRY_BUFFER = 0.001
 RISK_REWARD = 2.0
 MAX_WORKERS = 3  # Reduce to avoid API rate limit
 
-API_KEY     = os.getenv("SMART_API_KEY")
-CLIENT_ID   = os.getenv("SMART_API_CLIENT_ID")
-PIN         = os.getenv("SMART_PIN")
+API_KEY = os.getenv("SMART_API_KEY")
+CLIENT_ID = os.getenv("SMART_API_CLIENT_ID")
+PIN = os.getenv("SMART_PIN")
 TOTP_SECRET = os.getenv("SMART_TOTP_SECRET")
 
-DB_HOST     = "localhost"
-DB_USER     = "root"
-DB_PASSWORD = "pass123"
-DB_NAME     = "bullion"
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
 
 INTERVAL = "ONE_DAY"
 
-# ---------------- FLASK ----------------
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# ---------------- SMARTAPI ----------------
 smartApi = SmartConnect(API_KEY)
 
 def ensure_session():
@@ -44,7 +42,6 @@ def ensure_session():
         print("Auth error:", e)
         return False
 
-# ---------------- DB ----------------
 def get_watchlist(list_name=DEFAULT_LIST_NAME):
     """Fetch all stocks from DB for given list_name."""
     cnx = mysql.connector.connect(
@@ -60,7 +57,6 @@ def get_watchlist(list_name=DEFAULT_LIST_NAME):
     finally:
         cnx.close()
 
-# ---------------- TECHNICAL ANALYSIS ----------------
 def is_uptrend(candles):
     """Check if last 5 closes show uptrend."""
     if len(candles) < 5:
@@ -85,7 +81,6 @@ def compute_levels(low, high):
     target = entry - RISK_REWARD * risk
     return round(entry, 2), round(stop, 2), round(target, 2)
 
-# ---------------- DATA FETCH ----------------
 def get_symboltoken(exchange, trading_symbol, token_from_db=None):
     if token_from_db:
         return token_from_db
@@ -111,7 +106,7 @@ def get_daily_candles(exchange, token, days=LOOKBACK_DAYS):
             "fromdate": from_dt.strftime("%Y-%m-%d %H:%M"),
             "todate": to_dt.strftime("%Y-%m-%d %H:%M"),
         }
-        time.sleep(0.5)  # Respect API rate-limit
+        time.sleep(0.5)
         candles = smartApi.getCandleData(payload)
         data = (candles or {}).get("data") or []
         return [{"time": r[0], "open": float(r[1]), "high": float(r[2]),
@@ -120,7 +115,6 @@ def get_daily_candles(exchange, token, days=LOOKBACK_DAYS):
         print(f"Candle fetch error for token {token}: {e}")
         return []
 
-# ---------------- SCAN SYMBOL ----------------
 def scan_symbol(exchange, trading_symbol, token_from_db=None):
     token = get_symboltoken(exchange, trading_symbol, token_from_db)
     if not token:
@@ -150,7 +144,6 @@ def scan_symbol(exchange, trading_symbol, token_from_db=None):
         "target": target
     }
 
-# ---------------- API ENDPOINT ----------------
 @app.route("/api/shooting_star", methods=["POST"])
 def api_shooting_star():
     data = request.get_json(force=True) or {}
@@ -180,6 +173,5 @@ def api_shooting_star():
         }
     })
 
-# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(debug=True, port=5005)

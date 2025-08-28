@@ -47,7 +47,7 @@
 
         function displayLists(data) {
             const container = document.getElementById("listsdisplay");
-            container.innerHTML = ""; // clear previous content
+            container.innerHTML = "";
 
             if (!Array.isArray(data) || data.length === 0) {
                 container.innerHTML = "<p>No lists found</p>";
@@ -88,12 +88,12 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log("Received response:", data);  // 🪵 Debug log
+                        console.log("Received response:", data);
 
                         if (data.status === 'exists') {
                             alert("List name already exists!");
                         } else if (data.status === 'not_found') {
-                            window.location.href = data.redirect_url;
+                            window.location.reload();
                         } else {
                             alert("An error occurred.");
                         }
@@ -102,6 +102,26 @@
                         console.error('Fetch error:', error);
                         alert("Server error.");
                     });
+            }
+        }
+
+        async function createList(list_name) {
+            try {
+                const res = await fetch('http://127.0.0.1:5000/create_list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: list_name })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert("List created successfully!");
+                    window.location.reload();
+                } else {
+                    alert(data.message || "Failed to create list");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error connecting to server.");
             }
         }
     </script>

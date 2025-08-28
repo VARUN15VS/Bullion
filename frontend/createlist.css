@@ -62,3 +62,31 @@ button {
     background-color: #333;
     border: cyan 2px dashed;
 }
+.result {
+      margin-top: 20px;
+      padding: 10px;
+    }
+    .stock-card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 6px;
+      background: #f9f9f9;
+    }
+    .stock-info {
+      font-size: 14px;
+    }
+    .add-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .add-btn:hover {
+      background: #0056b3;
+    }
